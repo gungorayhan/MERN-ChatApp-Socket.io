@@ -4,9 +4,9 @@ import Message from "../models/message.model.js"
 export const sendMessage = async (req, res) => {
     try {
         const { message } = req.body
+        console.log(message)
         const { id: receiverId } = req.params
         const senderId = req.user._id
-
         let conversation = await Conversation.findOne({
             participants: { $all: [senderId, receiverId] },
         })
@@ -28,8 +28,9 @@ export const sendMessage = async (req, res) => {
         }
 
         //cosket.io functionalty will go here 
-
-        await Promise.all([conversation.save(),newMessage.save()])
+        await conversation.save()
+        await newMessage.save()
+        //await Promise.all([conversation.save(),newMessage.save()])
 
         res.status(201).json(newMessage);
 
@@ -43,9 +44,9 @@ export const getMessage=async(req,res)=>{
     try {
         const {id:userToChatId} = req.params;
         const senderId = req.user._id;
-        const conversation = await Conversation.find({
+        const conversation = await Conversation.findOne({
             participants:{$all:[senderId,userToChatId]}
-        }).populate("message")
+        }).populate("messages")
 
         if(!conversation) return res.status(200).json([])
 
